@@ -58,6 +58,11 @@
                         Produk
                     </a>
 
+                    <a href="{{ route('admin.dashboard') }}" class="text-gray-700 hover:text-blue-600 font-medium">
+                        <i class="fas fa-th-large mr-1"></i>
+                        Tombol Admin sementara
+                    </a>
+
 
                     <!-- Cart -->
                     <a href="#" class="text-gray-700 hover:text-blue-600 relative">
