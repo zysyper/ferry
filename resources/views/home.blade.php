@@ -178,20 +178,6 @@
                                         </span>
                                         <span class="text-gray-500 text-sm">/kg</span>
                                     </div>
-
-                                    @if ($product->stock_quantity > 0 && $product->status === 'active')
-                                        <button onclick="addToCart({{ $product->id }})"
-                                            class="bg-orange-500 hover:bg-orange-600 text-white px-4 py-2 rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg flex items-center">
-                                            <i class="fas fa-cart-plus mr-2"></i>
-                                            <span class="hidden sm:inline">Tambah</span>
-                                        </button>
-                                    @else
-                                        <button disabled
-                                            class="bg-gray-300 text-gray-500 px-4 py-2 rounded-lg cursor-not-allowed flex items-center">
-                                            <i class="fas fa-ban mr-2"></i>
-                                            <span class="hidden sm:inline">Tidak Tersedia</span>
-                                        </button>
-                                    @endif
                                 </div>
 
                                 <!-- Additional Actions -->

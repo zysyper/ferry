@@ -63,34 +63,61 @@
                         Tombol Admin sementara
                     </a>
 
-
-                    <!-- Cart -->
-                    <a href="#" class="text-gray-700 hover:text-blue-600 relative">
+                    <!-- Cart with Dynamic Count -->
+                    <a href="{{ route('cart.index') }}" class="text-gray-700 hover:text-blue-600 relative">
                         <i class="fas fa-shopping-cart text-xl"></i>
-                        <span
-                            class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">3</span>
+                        @php
+                            $cartItems = Session::get('cart', []);
+                            $totalItems = array_sum(array_column($cartItems, 'quantity'));
+                        @endphp
+                        @if ($totalItems > 0)
+                            <span id="cart-count"
+                                class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                                {{ $totalItems }}
+                            </span>
+                        @else
+                            <span id="cart-count"
+                                class="cart-badge absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center hidden">
+                                0
+                            </span>
+                        @endif
                     </a>
 
                     <!-- User Account -->
-                    <div class="relative dropdown">
-                        <button class="text-gray-700 hover:text-blue-600 flex items-center">
-                            <i class="fas fa-user-circle text-xl mr-1"></i>
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </button>
-                        <div
-                            class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-user mr-2"></i>Profil Saya
-                            </a>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-shopping-bag mr-2"></i>Pesanan Saya
-                            </a>
-                            <div class="border-t my-1"></div>
-                            <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                <i class="fas fa-sign-out-alt mr-2"></i>Logout
-                            </a>
+                    @guest
+                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 font-medium">
+                            <i class="fas fa-sign-in-alt mr-1"></i> Login
+                        </a>
+                        <a href="{{ route('register') }}" class="text-gray-700 hover:text-blue-600 font-medium">
+                            <i class="fas fa-user-plus mr-1"></i> Daftar
+                        </a>
+                    @else
+                        <div class="relative dropdown">
+                            <button type="button" onclick="toggleDropdown()" id="dropdownButton"
+                                class="text-gray-700 hover:text-blue-600 flex items-center focus:outline-none">
+                                <i class="fas fa-user-circle text-xl mr-1"></i>
+                                <i class="fas fa-chevron-down text-xs"></i>
+                            </button>
+                            <div id="dropdownMenu"
+                                class="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 hidden">
+                                <a href="" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-user mr-2"></i>Profil Saya
+                                </a>
+                                <a href="" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                    <i class="fas fa-shopping-bag mr-2"></i>Pesanan Saya
+                                </a>
+                                <div class="border-t my-1"></div>
+                                <a href="{{ route('logout') }}"
+                                    class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                                    <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                </a>
+                                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                                    @csrf
+                                </form>
+                            </div>
                         </div>
-                    </div>
+                    @endguest
                 </div>
 
                 <!-- Mobile Menu Button -->
@@ -103,7 +130,6 @@
 
             <!-- Mobile Menu -->
             <div id="mobile-menu" class="md:hidden hidden border-t border-gray-200 py-4">
-                <!-- Mobile Search -->
                 <div class="mb-4">
                     <form action="{{ route('products.index') }}" method="GET">
                         <div class="relative">
@@ -116,23 +142,44 @@
                         </div>
                     </form>
                 </div>
-
-                <!-- Mobile Navigation Links -->
                 <div class="space-y-2">
                     <a href="{{ route('products.index') }}"
                         class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
                         <i class="fas fa-th-large mr-2"></i>Produk
                     </a>
-                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
+                    <a href="{{ route('cart.index') }}"
+                        class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
                         <i class="fas fa-shopping-cart mr-2"></i>Keranjang
+                        @if ($totalItems > 0)
+                            <span
+                                class="bg-red-500 text-white text-xs rounded-full px-2 py-1 ml-2">{{ $totalItems }}</span>
+                        @endif
                     </a>
-                    <a href="#" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
-                        <i class="fas fa-user mr-2"></i>Akun Saya
-                    </a>
+                    @guest
+                        <a href="{{ route('login') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
+                            <i class="fas fa-sign-in-alt mr-2"></i>Login
+                        </a>
+                        <a href="{{ route('register') }}"
+                            class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
+                            <i class="fas fa-user-plus mr-2"></i>Daftar
+                        </a>
+                    @else
+                        <a href="" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded">
+                            <i class="fas fa-user mr-2"></i>Akun Saya
+                        </a>
+                        <a href="{{ route('logout') }}" class="block px-4 py-2 text-gray-700 hover:bg-gray-100 rounded"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
+                            @csrf
+                        </form>
+                    @endguest
                 </div>
             </div>
-        </div>
     </nav>
+
+
 
     <!-- Main Content -->
     <main>
@@ -220,15 +267,76 @@
             mobileMenu.classList.toggle('hidden');
         }
 
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', function(event) {
-            const mobileMenu = document.getElementById('mobile-menu');
-            const menuButton = event.target.closest('button');
+        function toggleDropdown() {
+            const menu = document.getElementById('dropdownMenu');
+            menu.classList.toggle('hidden');
+        }
 
-            if (!menuButton && !mobileMenu.contains(event.target)) {
-                mobileMenu.classList.add('hidden');
+        document.addEventListener('click', function(event) {
+            const dropdown = document.getElementById('dropdownMenu');
+            const button = document.getElementById('dropdownButton');
+            if (!dropdown.contains(event.target) && !button.contains(event.target)) {
+                dropdown.classList.add('hidden');
             }
         });
+
+        // Function to update cart count (for AJAX requests)
+        function updateCartCount(count) {
+            const cartCountElement = document.getElementById('cart-count');
+            if (count > 0) {
+                cartCountElement.textContent = count;
+                cartCountElement.classList.remove('hidden');
+                // Add bounce animation
+                cartCountElement.classList.add('cart-badge');
+                setTimeout(() => {
+                    cartCountElement.classList.remove('cart-badge');
+                }, 500);
+            } else {
+                cartCountElement.classList.add('hidden');
+            }
+        }
+
+        // Example AJAX function for adding to cart (optional)
+        function addToCart(productId, quantity) {
+            fetch('{{ route('cart.add') }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({
+                        product_id: productId,
+                        quantity: quantity
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCartCount(data.cart_count);
+                        // Show success notification
+                        showNotification('Produk berhasil ditambahkan ke keranjang!', 'success');
+                    } else {
+                        showNotification(data.message || 'Terjadi kesalahan', 'error');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showNotification('Terjadi kesalahan saat menambahkan produk', 'error');
+                });
+        }
+
+        // Simple notification function
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className =
+                `fixed top-4 right-4 p-4 rounded-lg text-white z-50 ${type === 'success' ? 'bg-green-500' : 'bg-red-500'}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
     </script>
 
     @stack('scripts')

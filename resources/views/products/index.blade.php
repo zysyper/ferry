@@ -177,17 +177,45 @@
                                                 <span class="text-xs text-gray-500">Rp
                                                     {{ number_format($product->price_per_kg, 0, ',', '.') }}/kg</span>
                                             </div>
-                                        </div>
-
-                                        <div class="flex justify-between items-center">
                                             <div class="text-xs text-gray-500">
                                                 Stok: {{ $product->stock_quantity }}
                                             </div>
+                                        </div>
+
+                                        <div class="flex justify-between items-center gap-4">
+                                            <!-- Tombol Lihat Detail -->
                                             <a href="{{ route('products.show', $product->id) }}"
                                                 class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition duration-200 text-sm font-medium">
                                                 Lihat Detail
                                             </a>
+
+                                            <!-- Form Tambah ke Keranjang -->
+                                            <form action="{{ route('cart.add') }}" method="POST"
+                                                class="flex items-center space-x-3">
+                                                @csrf
+                                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                <input type="hidden" name="quantity" value="1"
+                                                    id="quantity{{ $product->id }}">
+
+                                                <button type="submit"
+                                                    class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition duration-200 text-sm font-medium {{ $product->stock_quantity <= 0 ? 'opacity-50 cursor-not-allowed' : '' }}"
+                                                    {{ $product->stock_quantity <= 0 ? 'disabled' : '' }}>
+                                                    @if ($product->stock_quantity > 0)
+                                                        <svg class="w-4 h-4 inline mr-2" fill="none"
+                                                            stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                stroke-width="2"
+                                                                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 9H19m-12 0a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z">
+                                                            </path>
+                                                        </svg>
+                                                        Keranjang
+                                                    @else
+                                                        Stok Habis
+                                                    @endif
+                                                </button>
+                                            </form>
                                         </div>
+
                                     </div>
                                 </div>
                             @endforeach
@@ -218,6 +246,7 @@
             </div>
         </div>
     </div>
+
 
     <style>
         .line-clamp-2 {

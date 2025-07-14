@@ -95,7 +95,6 @@
                                     <span class="text-red-600 font-medium">Stok Habis</span>
                                 </div>
                             @endif
-
                             @if ($product->stock_quantity <= 5 && $product->stock_quantity > 0)
                                 <span class="text-orange-600 text-sm">(Stok Terbatas)</span>
                             @endif
@@ -115,15 +114,18 @@
                             </div>
                         @endif
 
-                        <!-- Add to Cart Button -->
-                        <div class="space-y-4">
+                        <!-- Add to Cart (Form-based) -->
+                        <form action="{{ route('cart.add') }}" method="POST" class="space-y-4">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+
                             @if ($product->stock_quantity > 0)
                                 <div class="flex items-center space-x-4">
                                     <label class="block text-sm font-medium text-gray-700">Jumlah:</label>
                                     <div class="flex items-center border border-gray-300 rounded-md">
                                         <button type="button" class="px-3 py-2 text-gray-600 hover:text-gray-800"
                                             onclick="decreaseQuantity()">-</button>
-                                        <input type="number" id="quantity" value="1" min="1"
+                                        <input type="number" name="quantity" id="quantity" value="1" min="1"
                                             max="{{ $product->stock_quantity }}"
                                             class="w-16 text-center border-0 focus:ring-0 focus:outline-none">
                                         <button type="button" class="px-3 py-2 text-gray-600 hover:text-gray-800"
@@ -132,23 +134,31 @@
                                     <span class="text-sm text-gray-500">Maks: {{ $product->stock_quantity }}</span>
                                 </div>
 
-                                <div class="flex space-x-4">
-                                    <button onclick="addToCart({{ $product->id }})"
-                                        class="flex-1 bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition duration-200 font-medium">
-                                        Tambah ke Keranjang
-                                    </button>
-                                    <button onclick="buyNow({{ $product->id }})"
-                                        class="flex-1 bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 transition duration-200 font-medium">
-                                        Beli Sekarang
-                                    </button>
-                                </div>
+                                <button type="submit"
+                                    class="w-full bg-blue-600 text-white py-3 px-6 rounded-md hover:bg-blue-700 transition duration-200 font-medium">
+                                    <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 9H19m-12 0a2 2 0 100 4 2 2 0 000-4zm10 0a2 2 0 100 4 2 2 0 000-4z" />
+                                    </svg>
+                                    Tambah ke Keranjang
+                                </button>
                             @else
                                 <button disabled
                                     class="w-full bg-gray-300 text-gray-500 py-3 px-6 rounded-md cursor-not-allowed font-medium">
                                     Stok Habis
                                 </button>
                             @endif
-                        </div>
+                        </form>
+                        <form action="{{ route('buy.now') }}" method="POST" class="w-full">
+                            @csrf
+                            <input type="hidden" name="product_id" value="{{ $product->id }}">
+                            <input type="hidden" name="quantity" id="buyNowQuantity" value="1">
+                            <button type="submit"
+                                class="w-full bg-green-600 text-white py-3 px-6 rounded-md hover:bg-green-700 transition duration-200 font-medium">
+                                Beli Sekarang
+                            </button>
+                        </form>
 
                         <!-- Additional Info -->
                         <div class="border-t pt-6">
@@ -181,8 +191,7 @@
                                     <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor"
                                         viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z">
-                                        </path>
+                                            d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
                                     </svg>
                                     <span class="text-gray-700">Pembayaran Aman</span>
                                 </div>
@@ -190,163 +199,52 @@
                         </div>
                     </div>
                 </div>
+                <!-- Form Beli Sekarang -->
 
-                <!-- Product Details Table -->
-                <div class="border-t px-6 py-6">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-4">Detail Produk</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Nama Produk:</span>
-                                <span class="font-medium">{{ $product->name }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Tipe:</span>
-                                <span class="font-medium">{{ ucfirst($product->type) }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Berat:</span>
-                                <span class="font-medium">{{ $product->weight }}kg</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Status Halal:</span>
-                                <span class="font-medium">
-                                    @if ($product->is_halal)
-                                        <span class="text-green-600">Ya</span>
-                                    @else
-                                        <span class="text-gray-600">Tidak</span>
-                                    @endif
-                                </span>
-                            </div>
-                        </div>
-                        <div class="space-y-3">
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Harga Total:</span>
-                                <span class="font-medium">Rp
-                                    {{ number_format($product->total_price, 0, ',', '.') }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Harga per Kg:</span>
-                                <span class="font-medium">Rp
-                                    {{ number_format($product->price_per_kg, 0, ',', '.') }}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Stok Tersedia:</span>
-                                <span class="font-medium">{{ $product->stock_quantity }} unit</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-600">Status:</span>
-                                <span class="font-medium">{{ ucfirst($product->status) }}</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+
+                <!-- Script -->
+                <script>
+                    function increaseQuantity() {
+                        const input = document.getElementById('quantity');
+                        const max = parseInt(input.max);
+                        let val = parseInt(input.value);
+                        if (val < max) {
+                            input.value = val + 1;
+                            syncBuyNowQuantity();
+                        }
+                    }
+
+                    function decreaseQuantity() {
+                        const input = document.getElementById('quantity');
+                        let val = parseInt(input.value);
+                        if (val > 1) {
+                            input.value = val - 1;
+                            syncBuyNowQuantity();
+                        }
+                    }
+
+
+                    function syncBuyNowQuantity() {
+                        const q = document.getElementById('quantity').value;
+                        const buyNowInput = document.getElementById('buyNowQuantity');
+                        if (buyNowInput) {
+                            buyNowInput.value = q;
+                        }
+                    }
+
+                    document.getElementById('quantity').addEventListener('input', syncBuyNowQuantity);
+                </script>
+
+                <style>
+                    .line-clamp-2 {
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+                </style>
             </div>
-
-            <!-- Related Products -->
-            @if ($relatedProducts->count() > 0)
-                <div class="mt-12">
-                    <h2 class="text-2xl font-bold text-gray-900 mb-6">Produk Terkait</h2>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                        @foreach ($relatedProducts as $relatedProduct)
-                            <div
-                                class="bg-white rounded-lg shadow-sm hover:shadow-lg transition-shadow duration-300 overflow-hidden">
-                                <div class="relative overflow-hidden">
-                                    <img src="{{ $relatedProduct->image_path ? asset('storage/' . $relatedProduct->image_path) : 'https://via.placeholder.com/300x200?text=No+Image' }}"
-                                        alt="{{ $relatedProduct->name }}"
-                                        class="w-full h-40 object-cover hover:scale-105 transition-transform duration-300">
-
-                                    @if ($relatedProduct->is_halal)
-                                        <div
-                                            class="absolute top-2 left-2 bg-green-500 text-white px-2 py-1 rounded-md text-xs font-semibold">
-                                            Halal
-                                        </div>
-                                    @endif
-
-                                    @if ($relatedProduct->stock_quantity <= 5 && $relatedProduct->stock_quantity > 0)
-                                        <div
-                                            class="absolute top-2 right-2 bg-orange-500 text-white px-2 py-1 rounded-md text-xs">
-                                            Stok Terbatas
-                                        </div>
-                                    @elseif($relatedProduct->stock_quantity <= 0)
-                                        <div
-                                            class="absolute top-2 right-2 bg-gray-500 text-white px-2 py-1 rounded-md text-xs">
-                                            Habis
-                                        </div>
-                                    @endif
-                                </div>
-
-                                <div class="p-4">
-                                    <div class="flex justify-between items-start mb-2">
-                                        <span
-                                            class="text-xs text-blue-600 font-medium">{{ ucfirst($relatedProduct->type) }}</span>
-                                        <span class="text-xs text-gray-500">{{ $relatedProduct->weight }}kg</span>
-                                    </div>
-
-                                    <h3 class="font-semibold text-gray-900 mb-2 line-clamp-2">{{ $relatedProduct->name }}
-                                    </h3>
-
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex flex-col">
-                                            <span class="text-lg font-bold text-gray-900">Rp
-                                                {{ number_format($relatedProduct->total_price, 0, ',', '.') }}</span>
-                                            <span class="text-xs text-gray-500">Rp
-                                                {{ number_format($relatedProduct->price_per_kg, 0, ',', '.') }}/kg</span>
-                                        </div>
-
-                                        <a href="{{ route('products.show', $relatedProduct->id) }}"
-                                            class="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                                            Lihat
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
         </div>
     </div>
-
-    <script>
-        function increaseQuantity() {
-            const quantityInput = document.getElementById('quantity');
-            const currentValue = parseInt(quantityInput.value);
-            const maxValue = parseInt(quantityInput.max);
-
-            if (currentValue < maxValue) {
-                quantityInput.value = currentValue + 1;
-            }
-        }
-
-        function decreaseQuantity() {
-            const quantityInput = document.getElementById('quantity');
-            const currentValue = parseInt(quantityInput.value);
-
-            if (currentValue > 1) {
-                quantityInput.value = currentValue - 1;
-            }
-        }
-
-        function addToCart(productId) {
-            const quantity = document.getElementById('quantity').value;
-            // Implement add to cart functionality
-            alert(`Produk ${productId} sebanyak ${quantity} unit telah ditambahkan ke keranjang.`);
-        }
-
-        function buyNow(productId) {
-            const quantity = document.getElementById('quantity').value;
-            // Implement buy now functionality
-            alert(`Membeli produk ${productId} sebanyak ${quantity} unit.`);
-        }
-    </script>
-
-    <style>
-        .line-clamp-2 {
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-    </style>
 @endsection
